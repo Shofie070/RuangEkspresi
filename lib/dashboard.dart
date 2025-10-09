@@ -1,12 +1,33 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/detail_page.dart';
 import 'package:flutter_application_1/models/menu_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'profile_page.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends StatefulWidget {
   final String username;
-
   const DashboardPage({super.key, required this.username});
+
+  @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  String? _profileImagePath;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfileImage();
+  }
+
+  Future<void> _loadProfileImage() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _profileImagePath = prefs.getString('profileImagePath');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,17 +45,21 @@ class DashboardPage extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: const CircleAvatar(
+            icon: CircleAvatar(
               backgroundColor: Colors.white,
-              child: Icon(Icons.person, color: Colors.black),
+              backgroundImage: _profileImagePath != null
+                  ? FileImage(File(_profileImagePath!))
+                  : const AssetImage("assets/profile.png") as ImageProvider,
             ),
-            onPressed: () {
-              Navigator.push(
+            onPressed: () async {
+              await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => ProfilePage(username: username),
+                  builder: (_) => ProfilePage(username: widget.username),
                 ),
               );
+              // refresh foto setelah kembali dari profile page
+              _loadProfileImage();
             },
           ),
         ],
@@ -60,7 +85,7 @@ class DashboardPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  "Selamat datang, $username 🌸",
+                  "Selamat datang, ${widget.username} 🌸",
                   style: const TextStyle(
                     fontSize: 20,
                     color: Colors.white70,

@@ -1,184 +1,212 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'login.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   final String username;
-
   const ProfilePage({super.key, required this.username});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  String? _profileImagePath;
+  String _description = "Belum ada deskripsi diri.";
+  final TextEditingController _descController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfileData();
+  }
+
+  Future<void> _loadProfileData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _profileImagePath = prefs.getString('profileImagePath');
+      _description = prefs.getString('profileDescription') ?? "Belum ada deskripsi diri.";
+      _descController.text = _description;
+    });
+  }
+
+  Future<void> _saveProfileData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('profileDescription', _description);
+    if (_profileImagePath != null) {
+      await prefs.setString('profileImagePath', _profileImagePath!);
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+    if (picked != null) {
+      setState(() => _profileImagePath = picked.path);
+      _saveProfileData();
+    }
+  }
+
+  void _editDescription() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFF4B0082),
+        title: const Text(
+          "Edit Deskripsi",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        content: TextField(
+          controller: _descController,
+          style: const TextStyle(color: Colors.white),
+          maxLines: 3,
+          decoration: const InputDecoration(
+            hintText: "Tulis sesuatu tentang dirimu...",
+            hintStyle: TextStyle(color: Colors.white54),
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _description = _descController.text;
+              });
+              _saveProfileData();
+              Navigator.pop(context);
+            },
+            child: const Text("Simpan", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _logout() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginPage()),
+    );
+  }
+
+  void _editProfile() {
+    // Dialog sederhana untuk ganti nama user (opsional)
+    TextEditingController nameController = TextEditingController(text: widget.username);
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFF4B0082),
+        title: const Text(
+          "Edit Profil",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        content: TextField(
+          controller: nameController,
+          style: const TextStyle(color: Colors.white),
+          decoration: const InputDecoration(
+            labelText: "Nama",
+            labelStyle: TextStyle(color: Colors.white70),
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("Batal", style: TextStyle(color: Colors.white)),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                // bisa diatur nanti untuk menyimpan perubahan username ke database/local
+              });
+              Navigator.pop(context);
+            },
+            child: const Text("Simpan", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Background gradasi ungu → biru lembut
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF5E2B97), Color(0xFF3F51B5)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-            child: Column(
-              children: [
-                // Avatar & nama user
-                const CircleAvatar(
-                  radius: 60,
-                  backgroundImage: AssetImage('assets/images/profile.png'),
-                  backgroundColor: Color(0xFF7B5EDB),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  username,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  "Flutter Developer | UI/UX Enthusiast",
-                  style: TextStyle(color: Color(0xFFE0D6FF)),
-                ),
-                const SizedBox(height: 25),
-
-                // Statistik ringkas
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: const [
-                    _StatCard(title: "Projects", value: "12"),
-                    _StatCard(title: "Followers", value: "320"),
-                    _StatCard(title: "Following", value: "180"),
-                  ],
-                ),
-
-                const SizedBox(height: 25),
-
-                // Kolom putih transparan berisi action card
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    children: [
-                      _ProfileActionButton(
-                        icon: Icons.edit,
-                        label: "Edit Profile",
-                        onTap: () {},
-                      ),
-                      _ProfileActionButton(
-                        icon: Icons.notifications_active,
-                        label: "Notifications",
-                        onTap: () {},
-                      ),
-                      _ProfileActionButton(
-                        icon: Icons.settings,
-                        label: "Settings",
-                        onTap: () {},
-                      ),
-                      _ProfileActionButton(
-                        icon: Icons.color_lens,
-                        label: "Theme Customization",
-                        onTap: () {},
-                      ),
-                      _ProfileActionButton(
-                        icon: Icons.logout,
-                        label: "Log Out",
-                        color: Colors.redAccent,
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 30),
-
-                // Footer
-                const Text(
-                  "App version 1.0.0",
-                  style: TextStyle(
-                    color: Color(0xFFCEC8FF),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
+      backgroundColor: const Color(0xFF4B0082),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF1976D2),
+        title: const Text("Profil", style: TextStyle(color: Colors.white)),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            GestureDetector(
+              onTap: _pickImage,
+              child: CircleAvatar(
+                radius: 55,
+                backgroundImage: _profileImagePath != null
+                    ? FileImage(File(_profileImagePath!))
+                    : const AssetImage("assets/profile.png") as ImageProvider,
+                backgroundColor: Colors.white24,
+              ),
             ),
-          ),
+            const SizedBox(height: 16),
+            Text(
+              widget.username,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: _editDescription,
+              child: Text(
+                _description,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 16,
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 30),
+
+            // 🟣 Tombol "Edit Profil" ditambahkan di sini
+            _buildButton(Icons.edit, "Edit Profil", _editProfile),
+
+            _buildButton(Icons.notifications, "Notifikasi", () {}),
+            _buildButton(Icons.settings, "Pengaturan", () {}),
+            _buildButton(Icons.logout, "Logout", _logout, isLogout: true),
+          ],
         ),
       ),
     );
   }
-}
 
-class _StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-
-  const _StatCard({required this.title, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        Text(
-          title,
-          style: const TextStyle(
-            color: Color(0xFFE0D6FF),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ProfileActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color? color;
-  final VoidCallback onTap;
-
-  const _ProfileActionButton({
-    required this.icon,
-    required this.label,
-    this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: Colors.white.withOpacity(0.25),
-      elevation: 0,
+  Widget _buildButton(IconData icon, String text, VoidCallback onTap, {bool isLogout = false}) {
+    return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: ListTile(
-        leading: Icon(icon, color: color ?? Colors.white),
-        title: Text(
-          label,
-          style: TextStyle(
-            fontSize: 16,
-            color: color ?? Colors.white,
-            fontWeight: FontWeight.w500,
-          ),
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        icon: Icon(icon, color: Colors.white),
+        label: Text(
+          text,
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
-        trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white70, size: 16),
-        onTap: onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isLogout ? Colors.redAccent : const Color(0xFF1976D2),
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          elevation: 4,
+        ),
+        onPressed: onTap,
       ),
     );
   }

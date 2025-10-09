@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-// Parent class dengan enkapsulasi
+// 🔹 Parent class dengan enkapsulasi
 class MenuModel {
   String title;
   String _description;
@@ -9,31 +9,35 @@ class MenuModel {
   String _subtitle;
   IconData _icon;
 
-  // Constructor
+  // 🔹 Constructor
   MenuModel(
     this.title,
-    this._description,
+    String description,
     this._bgColor,
     this._icon, [
     this._imagePath,
     this._subtitle = "",
-  ]);
+  ]) : _description = description;
+
+  // 🔹 Getter
   String get description => _description;
   Color get bgColor => _bgColor;
   String? get imagePath => _imagePath;
   String get subtitle => _subtitle;
   IconData get icon => _icon;
-  set description(String v) => _description = v;
-  set bgColor(Color v) => _bgColor = v;
-  set imagePath(String? v) => _imagePath = v;
-  set subtitle(String v) => _subtitle = v;
-  set icon(IconData v) => _icon = v;
 
-  // Polymorphism: method bisa dioverride oleh subclass
+  // 🔹 Setter
+  set description(String value) => _description = value;
+  set bgColor(Color value) => _bgColor = value;
+  set imagePath(String? value) => _imagePath = value;
+  set subtitle(String value) => _subtitle = value;
+  set icon(IconData value) => _icon = value;
+
+  // 🔹 Polymorphism: method bisa dioverride oleh subclass
   String getDetail() => _description;
 }
 
-// Subclass (contoh Inheritance + Polymorphism)
+// 🔹 Subclass (contoh Inheritance + Polymorphism)
 class SpecialMenuModel extends MenuModel {
   final String extraNote;
 
