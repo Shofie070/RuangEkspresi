@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter/webview_flutter.dart' as webview;
 import 'package:intl/intl.dart';
 import 'models/menu_model.dart';
 
@@ -297,18 +297,18 @@ Widget _buildReflection() {
   );
 }
 
-/// 🟢 Pelukan Musik
 Widget _buildMusic() {
-  final WebViewController controller = WebViewController()
-    ..setJavaScriptMode(JavaScriptMode.unrestricted)
-    ..loadRequest(Uri.parse(" https://www.youtube.com/"));
+  final webview.WebViewController controller = webview.WebViewController()
+    ..setJavaScriptMode(webview.JavaScriptMode.unrestricted)
+    ..loadRequest(Uri.parse("https://music.youtube.com/")); // ✅ LEBIH BAIK
 
   return Card(
     color: Colors.green.shade800,
     margin: const EdgeInsets.symmetric(vertical: 8),
-    child: SizedBox(height: 400, child: WebViewWidget(controller: controller)),
+    child: SizedBox(height: 400, child: webview.WebViewWidget(controller: controller)),
   );
 }
+
 
 /// 🟠 Karya yang Bicara
 Widget _buildGallery() {

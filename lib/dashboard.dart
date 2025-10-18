@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/detail_page.dart';
 import 'package:flutter_application_1/models/menu_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'profile_page.dart';
+import 'profile/profile_page.dart';
 
 class DashboardPage extends StatefulWidget {
   final String username;
