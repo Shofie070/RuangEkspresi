@@ -1,10 +1,11 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/detail_page.dart';
-import 'package:flutter_application_1/models/menu_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
+import 'detail_page.dart';
 import 'profile/profile_page.dart';
+import 'package:ruang_ekspresi/models/menu_model.dart'; // ✅ tambahan penting
 
+/// 🔹 Dashboard Page
 class DashboardPage extends StatefulWidget {
   final String username;
   const DashboardPage({super.key, required this.username});
@@ -48,8 +49,8 @@ class _DashboardPageState extends State<DashboardPage> {
             icon: CircleAvatar(
               backgroundColor: Colors.white,
               backgroundImage: _profileImagePath != null
-                  ? FileImage(File(_profileImagePath!))
-                  : const AssetImage("assets/profile.png") as ImageProvider,
+                  ? FileImage(File(_profileImagePath!)) as ImageProvider
+                  : const AssetImage("assets/profile.png"),
             ),
             onPressed: () async {
               await Navigator.push(
@@ -58,8 +59,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   builder: (_) => ProfilePage(username: widget.username),
                 ),
               );
-              // refresh foto setelah kembali dari profile page
-              _loadProfileImage();
+              _loadProfileImage(); // refresh foto setelah kembali
             },
           ),
         ],
@@ -98,7 +98,7 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
 
           // 🔹 List menu dari model
-          ...menuList.map((menu) => _buildMenuCard(context, menu)),
+          ...menuList.map((menu) => _buildMenuCard(context, menu)).toList(),
         ],
       ),
     );
@@ -119,7 +119,8 @@ class _DashboardPageState extends State<DashboardPage> {
         ],
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         leading: Icon(menu.icon, color: Colors.black, size: 32),
         title: Text(
           menu.title,

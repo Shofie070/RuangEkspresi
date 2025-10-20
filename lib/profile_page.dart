@@ -87,7 +87,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void _logout() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const LoginPage()),
+      MaterialPageRoute(builder: (_) => LoginPage()),
     );
   }
 

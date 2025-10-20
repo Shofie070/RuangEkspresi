@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-// 🔹 Parent class dengan enkapsulasi
+/// 🔹 Parent class dengan enkapsulasi
 class MenuModel {
   String title;
   String _description;
@@ -9,7 +9,7 @@ class MenuModel {
   String _subtitle;
   IconData _icon;
 
-  // 🔹 Constructor
+  /// 🔹 Constructor
   MenuModel(
     this.title,
     String description,
@@ -19,25 +19,25 @@ class MenuModel {
     this._subtitle = "",
   ]) : _description = description;
 
-  // 🔹 Getter
+  /// 🔹 Getter
   String get description => _description;
   Color get bgColor => _bgColor;
   String? get imagePath => _imagePath;
   String get subtitle => _subtitle;
   IconData get icon => _icon;
 
-  // 🔹 Setter
+  /// 🔹 Setter
   set description(String value) => _description = value;
   set bgColor(Color value) => _bgColor = value;
   set imagePath(String? value) => _imagePath = value;
   set subtitle(String value) => _subtitle = value;
   set icon(IconData value) => _icon = value;
 
-  // 🔹 Polymorphism: method bisa dioverride oleh subclass
+  /// 🔹 Polymorphism: method bisa dioverride oleh subclass
   String getDetail() => _description;
 }
 
-// 🔹 Subclass (contoh Inheritance + Polymorphism)
+/// 🔹 Subclass (contoh Inheritance + Polymorphism)
 class SpecialMenuModel extends MenuModel {
   final String extraNote;
 
@@ -54,12 +54,12 @@ class SpecialMenuModel extends MenuModel {
   String getDetail() => "${super.getDetail()}\nCatatan: $extraNote";
 }
 
-// ✅ List data menu
+/// ✅ List data menu
 List<MenuModel> menuList = [
   MenuModel(
     "Aku Hari Ini",
     "Catat ekspresimu setiap hari di sini.",
-    Colors.purple,
+    Colors.deepPurple, // 🔹 Lebih gelap biar teks kontras
     Icons.edit,
     "assets/logo.jpeg",
     "Menjadi cermin emosi harian",
@@ -67,7 +67,7 @@ List<MenuModel> menuList = [
   MenuModel(
     "Ruang Refleksi",
     "Ruang untuk merenung dan memahami diri.",
-    Colors.blue,
+    Colors.indigo, // 🔹 Lebih pekat daripada biru biasa
     Icons.self_improvement,
     null,
     "Memberi tempat untuk menata pikiran",
@@ -75,14 +75,14 @@ List<MenuModel> menuList = [
   SpecialMenuModel(
     "Pelukan Musik",
     "Dengarkan musik untuk menenangkan hati.",
-    Colors.green,
+    Colors.teal.shade700, // 🔹 Hijau tua tapi masih lembut
     Icons.music_note,
     "Musik favorit ditambahkan setiap minggu.",
   ),
   MenuModel(
     "Karya yang Bicara",
     "Bagikan karya tulisan atau gambarmu.",
-    Colors.orange,
+    Colors.orange.shade700, // 🔹 Oranye agak tua supaya nggak silau
     Icons.brush,
     null,
     "Diam pun bisa menyampaikan",
@@ -90,7 +90,7 @@ List<MenuModel> menuList = [
   MenuModel(
     "About",
     "Informasi aplikasi dan pembuat.",
-    Colors.teal,
+    Colors.cyan.shade800, // 🔹 Teal diganti cyan tua biar teks kebaca
     Icons.info,
     null,
     "Tentang aplikasi & developer",
