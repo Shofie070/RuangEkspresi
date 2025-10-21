@@ -1,8 +1,21 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:ruang_ekspresi/login.dart';
+import 'package:ruang_ekspresi/profile/edit_profil.dart';
+import 'package:ruang_ekspresi/profile/kredensial.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import './riwayat_aktivitas.dart'; 
+
+// Asumsi: Anda memiliki halaman LoginPage di path '../login.dart'
+class LoginPage extends StatelessWidget {
+  const LoginPage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(child: Text("Halaman Login")),
+    );
+  }
+}
 
 class ProfilePage extends StatefulWidget {
   final String username;
@@ -14,23 +27,48 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   String? _profileImagePath;
-  String _description = "Belum ada deskripsi diri.";
+  String _description = "Memuat..."; 
+  // Ganti widget.username dengan _userName agar bisa di-update
+  String _userName = "Memuat..."; 
+
   final ImagePicker _imagePicker = ImagePicker();
+  
+  // VARIABLE UNTUK MENYIMPAN DATA LOGIN (MEMUAT DARI SHAREDPREFERENCES)
+  String _userEmail = "Memuat..."; 
+  String _userPassword = "Memuat...";
 
   @override
   void initState() {
     super.initState();
+    // Awalnya, gunakan username dari argumen widget
+    _userName = widget.username; 
     _loadProfileData();
+    _loadKredensialData(); 
+  }
+  
+  // FUNGSI UNTUK MEMUAT EMAIL DAN PASSWORD DARI SHAREDPREFERENCES
+  Future<void> _loadKredensialData() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      _userEmail = prefs.getString('userEmail') ?? 'Email tidak ditemukan'; 
+      _userPassword = prefs.getString('userPassword') ?? 'Password tidak ditemukan'; 
+    });
   }
 
+  // FUNGSI DITINGKATKAN: MEMUAT NAMA DAN DESKRIPSI
   Future<void> _loadProfileData() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     setState(() {
+      // Ambil nama dari 'profileName' (disimpan di EditProfilePage)
+      _userName = prefs.getString('profileName') ?? widget.username; 
       _profileImagePath = prefs.getString('profileImagePath');
       _description = prefs.getString('profileDescription') ?? "Belum ada deskripsi diri.";
     });
   }
 
+  // >>> FUNGSI _pickImage YANG LENGKAP <<<
   Future<void> _pickImage() async {
     try {
       final XFile? pickedFile = await _imagePicker.pickImage(
@@ -48,40 +86,66 @@ class _ProfilePageState extends State<ProfilePage> {
           _profileImagePath = pickedFile.path;
         });
 
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Foto profil berhasil diubah! 📸"),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Foto profil berhasil diubah! 📸"),
-            backgroundColor: Colors.green,
+            content: Text("Gagal memilih gambar"),
+            backgroundColor: Colors.red,
           ),
         );
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Gagal memilih gambar"),
-          backgroundColor: Colors.red,
+    }
+  }
+
+  // >>> FUNGSI _openEditProfile SUDAH DIKOREKSI UNTUK NAVIGASI <<<
+  void _openEditProfile() async {
+    if (context.mounted) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => EditProfilePage(
+            username: _userName, // Kirim nama yang sedang aktif
+          ),
         ),
+      );
+      // MEMUAT ULANG DATA SETELAH KEMBALI DARI EDIT PROFILE PAGE
+      _loadProfileData(); 
+    }
+  }
+
+  void _openRiwayatAktivitas() {
+    if (context.mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const RiwayatAktivitasPage()),
       );
     }
   }
 
-  // === NON-AKTIFKAN DULU NAVIGASI KE HALAMAN LAIN ===
-  void _openEditProfile() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Edit Profil - Coming Soon! 🚀")),
-    );
-  }
-
-  void _openRiwayatAktivitas() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Riwayat Aktivitas - Coming Soon! 🚀")),
-    );
-  }
-
+  // MENGIRIM EMAIL DAN PASSWORD YANG SUDAH DI-LOAD KE KredensialPage
   void _openKredensial() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Kredensial - Coming Soon! 🚀")),
-    );
+    if (context.mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => KredensialPage(
+            username: _userName, // Ganti widget.username ke _userName
+            email: _userEmail,      
+            password: _userPassword, 
+          ),
+        ),
+      );
+    }
   }
 
   void _logout() async {
@@ -89,6 +153,7 @@ class _ProfilePageState extends State<ProfilePage> {
     await prefs.clear();
 
     if (context.mounted) {
+      // Mengarahkan ke halaman Login (Asumsi LoginPage ada di path yang benar)
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const LoginPage()),
@@ -97,6 +162,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  // >>> WIDGET _buildButton LENGKAP <<<
   Widget _buildButton(IconData icon, String label, VoidCallback onTap,
       {bool isLogout = false}) {
     return Container(
@@ -176,11 +242,12 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ],
                       ),
+                      // >>> CircleAvatar LENGKAP <<<
                       child: CircleAvatar(
                         backgroundColor: Colors.white,
                         backgroundImage: _profileImagePath != null
                             ? FileImage(File(_profileImagePath!))
-                            : const AssetImage('assets/profile.png') as ImageProvider,
+                            : const AssetImage('assets/profile.png') as ImageProvider, // ASUMSI PATH DEFAULT PROFILE
                       ),
                     ),
                     Positioned(
@@ -214,7 +281,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  widget.username,
+                  _userName, // Ganti widget.username ke _userName
                   style: const TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.bold,

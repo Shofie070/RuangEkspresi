@@ -1,5 +1,6 @@
 // login.dart
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // <<< TAMBAHKAN INI
 import 'dashboard.dart';
 import 'register.dart';
 import 'user_data.dart'; // untuk akses data register
@@ -16,8 +17,15 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
+  // FUNGSI BARU: MENYIMPAN DATA EMAIL DAN PASSWORD KE SHAREDPREFERENCES
+  Future<void> _saveLoginData(String email, String password) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userEmail', email);
+    await prefs.setString('userPassword', password);
+  }
+
   // ✅ fungsi login
-  void _login() {
+  void _login() async { // <<< UBAH JADI ASYNC
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
 
@@ -26,17 +34,32 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    // ✅ validasi login fleksibel
-    if ((email == "admin@gmail.com" && password == "123456") || // admin
-        (email == "shofie@gmail.com" && password == "123456") || // default user
-        (email == registeredEmail && password == registeredPassword)) {
-      String displayName = email.split("@")[0];
+    // Tentukan username dari email yang berhasil login
+    String? displayName;
+    bool loginSuccess = false;
 
+    // ✅ validasi login fleksibel
+    if (email == "admin@gmail.com" && password == "123456") { // admin
+      displayName = "admin";
+      loginSuccess = true;
+    } else if (email == "shofie@gmail.com" && password == "123456") { // default user
+      displayName = "shofie";
+      loginSuccess = true;
+    } else if (email == registeredEmail && password == registeredPassword) {
+      displayName = email.split("@")[0];
+      loginSuccess = true;
+    }
+    
+    if (loginSuccess) {
+      // 1. SIMPAN DATA LOGIN KE SHAREDPREFERENCES
+      await _saveLoginData(email, password); // <<< PANGGIL FUNGSI INI
+
+      // 2. NAVIGASI KE DASHBOARD
       Navigator.pushReplacement(
         context,
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) =>
-              DashboardPage(username: displayName),
+              DashboardPage(username: displayName!),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(opacity: animation, child: child);
           },

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
-import 'package:ruang_ekspresi/widgets/music.widget.dart';
+import 'package:ruang_ekspresi/widgets/music_widget.dart';
 import 'package:ruang_ekspresi/widgets/reflection_widget.dart';
 import 'package:ruang_ekspresi/widgets/today_widget.dart';
 import 'package:ruang_ekspresi/widgets/about_widget.dart';
