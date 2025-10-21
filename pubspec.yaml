@@ -13,16 +13,20 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.3.2
-  getwidget: ^7.0.0            # versi baru, fix AppBarTheme error
+  getwidget: ^7.0.0             
   webview_flutter: ^4.10.0
   device_info_plus: ^12.1.0
   intl: ^0.20.2
   image_picker: ^1.1.2
+  youtube_player_flutter: ^8.1.2
+  url_launcher: ^6.2.2
+  simple_icons: ^14.6.1       
+  font_awesome_flutter: ^10.7.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^6.0.0      
+  flutter_lints: ^6.0.0      
 
 flutter:
   uses-material-design: true
